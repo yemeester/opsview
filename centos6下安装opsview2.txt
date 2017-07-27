@@ -1,0 +1,36 @@
+﻿CentOS 6.4 x86_64 安装opsview
+
+1. 关闭SELINUX和iptables
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+setenforce 0
+service iptables stop
+
+2. yum配置
+添加本地yum源
+
+3. 安装opsview
+yum install opsview*.rpm dep/*.rpm mod_auth_tkt_opsview-2.0.5rc3-1.el6.x86_64.rpm
+
+4. MySQL安装配置
+yum install mysql-server
+chkconfig --level 35 mysqld on
+service mysqld start
+mysqladmin -u root password '123456'
+
+5. opsview配置
+sed -i 's/"changeme"/"123456"/g' /usr/local/nagios/etc/opsview.conf
+/usr/local/nagios/bin/db_mysql -u root -p123456
+/usr/local/nagios/bin/db_opsview db_install
+/usr/local/nagios/bin/db_runtime db_install
+chown -R nagios:nagios /var/log/opsview
+chmod 750 /var/log/opsview
+chmod 660 /var/log/opsview/opsviewd.log
+/usr/local/nagios/bin/rc.opsview gen_config
+
+6. 启动opsview
+/etc/init.d/opsview-web start
+
+7. 登陆opsview
+http://IP:3000
+ID : admin
+Pass : initial
